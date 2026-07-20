@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useContacts } from '@/hooks/useContacts'
+import { useConfirm } from '@/contexts/ConfirmContext'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -21,6 +22,7 @@ const emptyContact: Omit<Contact, 'id' | 'user_id' | 'created_at'> = {
 
 export function ContactsPage() {
   const { contacts, loading, fetchAll, addContact, updateContact, removeContact } = useContacts()
+  const { confirm } = useConfirm()
   const [search, setSearch] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -78,7 +80,12 @@ export function ContactsPage() {
   }
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`¿Eliminar contacto "${name}"?`)) return
+    const ok = await confirm({
+      title: 'Eliminar contacto',
+      message: `¿Estás seguro de eliminar el contacto "${name}"? Esta acción no se puede deshacer.`,
+      confirmLabel: 'Eliminar',
+    })
+    if (!ok) return
     await removeContact(id)
   }
 

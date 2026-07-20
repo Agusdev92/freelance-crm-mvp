@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useContacts } from '@/hooks/useContacts'
 import { useDeals } from '@/hooks/useDeals'
+import { useConfirm } from '@/contexts/ConfirmContext'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -33,6 +34,7 @@ const emptyForm: DealForm = { name: '', contact_id: '', value: '', stage: 'lead'
 export function PipelinePage() {
   const { contacts, fetchAll: fetchContacts } = useContacts()
   const { deals, fetchAll: fetchDeals, addDeal, updateDeal, removeDeal } = useDeals()
+  const { confirm } = useConfirm()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<DealForm>(emptyForm)
@@ -80,7 +82,12 @@ export function PipelinePage() {
   }
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`¿Eliminar deal "${name}"?`)) return
+    const ok = await confirm({
+      title: 'Eliminar deal',
+      message: `¿Estás seguro de eliminar el deal "${name}"? Esta acción no se puede deshacer.`,
+      confirmLabel: 'Eliminar',
+    })
+    if (!ok) return
     await removeDeal(id)
   }
 

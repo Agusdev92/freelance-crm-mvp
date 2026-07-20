@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useContacts } from '@/hooks/useContacts'
 import { useProposals } from '@/hooks/useProposals'
+import { useConfirm } from '@/contexts/ConfirmContext'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -40,6 +41,7 @@ const emptyForm: ProposalForm = {
 export function ProposalsPage() {
   const { contacts, fetchAll: fetchContacts } = useContacts()
   const { proposals, loading, fetchAll: fetchProposals, generateAndSave, removeProposal } = useProposals()
+  const { confirm } = useConfirm()
   const [modalOpen, setModalOpen] = useState(false)
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedContent, setSelectedContent] = useState('')
@@ -83,7 +85,12 @@ export function ProposalsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta propuesta?')) return
+    const ok = await confirm({
+      title: 'Eliminar propuesta',
+      message: '¿Estás seguro de eliminar esta propuesta? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+    })
+    if (!ok) return
     await removeProposal(id)
   }
 

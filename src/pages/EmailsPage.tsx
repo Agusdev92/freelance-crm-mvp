@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useContacts } from '@/hooks/useContacts'
 import { useEmails } from '@/hooks/useEmails'
+import { useConfirm } from '@/contexts/ConfirmContext'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -22,6 +23,7 @@ const emptyForm: EmailForm = { contact_id: '', subject: '', body: '' }
 export function EmailsPage() {
   const { contacts, fetchAll: fetchContacts } = useContacts()
   const { emails, loading, fetchAll: fetchEmails, addEmail, markAsOpened, removeEmail } = useEmails()
+  const { confirm } = useConfirm()
   const [search, setSearch] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState<EmailForm>(emptyForm)
@@ -122,7 +124,14 @@ export function EmailsPage() {
                           </button>
                         )}
                         <button
-                          onClick={() => removeEmail(e.id)}
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: 'Eliminar email',
+                              message: '¿Estás seguro de eliminar este email registrado?',
+                              confirmLabel: 'Eliminar',
+                            })
+                            if (ok) removeEmail(e.id)
+                          }}
                           className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
                         >
                           <Trash2 size={14} />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useContacts } from '@/hooks/useContacts'
 import { useInvoices } from '@/hooks/useInvoices'
+import { useConfirm } from '@/contexts/ConfirmContext'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -57,6 +58,7 @@ const emptyForm: InvoiceForm = {
 export function InvoicesPage() {
   const { contacts, fetchAll: fetchContacts } = useContacts()
   const { invoices, loading, fetchAll: fetchInvoices, addInvoice, markPaid, removeInvoice } = useInvoices()
+  const { confirm } = useConfirm()
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState<InvoiceForm>(emptyForm)
 
@@ -165,7 +167,14 @@ export function InvoicesPage() {
                           </button>
                         )}
                         <button
-                          onClick={() => removeInvoice(inv.id)}
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: 'Eliminar factura',
+                              message: '¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.',
+                              confirmLabel: 'Eliminar',
+                            })
+                            if (ok) removeInvoice(inv.id)
+                          }}
                           className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
                         >
                           <Trash2 size={14} />
