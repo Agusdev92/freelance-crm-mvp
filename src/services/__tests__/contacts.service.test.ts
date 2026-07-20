@@ -25,8 +25,8 @@ describe('contacts.service (localStorage mode)', () => {
       })
       const result = await contactsService.fetchContacts(TEST_USER)
       expect(result).toHaveLength(1)
-      expect(result[0].name).toBe('Test User')
-      expect(result[0].id).toBe(contact.id)
+      expect(result[0]?.name).toBe('Test User')
+      expect(result[0]?.id).toBe(contact.id)
     })
   })
 
@@ -54,11 +54,11 @@ describe('contacts.service (localStorage mode)', () => {
 
     it('adds contact to the beginning of the list', async () => {
       await contactsService.insertContact(TEST_USER, { name: 'First', email: 'a@test.com', company: null, phone: null, tags: [], notes: null })
-      const second = await contactsService.insertContact(TEST_USER, { name: 'Second', email: 'b@test.com', company: null, phone: null, tags: [], notes: null })
+      await contactsService.insertContact(TEST_USER, { name: 'Second', email: 'b@test.com', company: null, phone: null, tags: [], notes: null })
 
       const all = await contactsService.fetchContacts(TEST_USER)
-      expect(all[0].name).toBe('Second')
-      expect(all[1].name).toBe('First')
+      expect(all[0]?.name).toBe('Second')
+      expect(all[1]?.name).toBe('First')
     })
   })
 
@@ -126,7 +126,7 @@ describe('contacts.service (localStorage mode)', () => {
 
       const mine = await contactsService.fetchContacts(TEST_USER)
       expect(mine).toHaveLength(1)
-      expect(mine[0].name).toBe('My Contact')
+      expect(mine[0]?.name).toBe('My Contact')
     })
   })
 })

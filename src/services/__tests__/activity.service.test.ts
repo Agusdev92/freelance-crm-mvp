@@ -23,8 +23,9 @@ describe('activity.service (localStorage mode)', () => {
       await activityService.addActivity(TEST_USER, 'Second')
 
       const all = await activityService.fetchActivity(TEST_USER)
-      expect(all[0].text).toBe('Second')
-      expect(all[1].text).toBe('First')
+      expect(all).toHaveLength(2)
+      expect(all[0]?.text).toBe('Second')
+      expect(all[1]?.text).toBe('First')
     })
 
     it('caps at 20 entries', async () => {
@@ -34,8 +35,8 @@ describe('activity.service (localStorage mode)', () => {
 
       const all = await activityService.fetchActivity(TEST_USER)
       expect(all).toHaveLength(20)
-      expect(all[0].text).toBe('Action 24')
-      expect(all[19].text).toBe('Action 5')
+      expect(all[0]?.text).toBe('Action 24')
+      expect(all[19]?.text).toBe('Action 5')
     })
   })
 
