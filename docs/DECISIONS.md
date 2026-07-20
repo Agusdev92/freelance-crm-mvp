@@ -4,128 +4,118 @@ Key architectural choices visible in the codebase, with rationale and implicatio
 
 ---
 
-## 1. Vanilla JS, no framework
+## 1. React 19 + TypeScript + Vite
 
-**What:** Plain JavaScript with global functions. No React, Vue, Svelte, or any framework.
+**What:** Modern React with strict TypeScript and Vite as bundler/dev server.
 
-**Why (implied):** MVP speed — zero build step, instant deploy as static files, no toolchain to maintain.
+**Why:** Type safety, fast HMR, code splitting, ecosystem support. Migrated from vanilla JS in Sprint 1.
 
 **Implications:**
-- All state is global variables (`app.js:1-11`)
-- DOM manipulation via `innerHTML` and `document.getElementById`
-- No component model — each view is a function that re-renders a section
-- No type safety, no compile-time checks
+- All state managed via React hooks and context
+- Components are the unit of UI, not DOM manipulation
+- TypeScript strict mode catches errors at compile time
+- Vite handles bundling, tree-shaking, and code splitting
 
 ---
 
-## 2. No build step or bundler
+## 2. Dual-mode backend (Supabase + localStorage)
 
-**What:** Files are served as-is. No webpack, Vite, Rollup, or esbuild.
+**What:** The app works with or without a Supabase project. Toggle is `isSupabaseConfigured` boolean.
 
-**Why (implied):** Simplicity. Deploy is literally "upload these files."
-
-**Implications:**
-- Script load order in `index.html` is the dependency graph
-- All functions must be global (no ES modules)
-- No tree-shaking, no minification in the repo itself
-- CDN-hosted Supabase client is the only "dependency"
-
----
-
-## 3. Dual-mode backend (Supabase + localStorage)
-
-**What:** The app works with or without a Supabase project. Toggle is `useSupabase` boolean.
-
-**Why (implied):** Instant demo without account creation. Data persists in browser for quick testing.
+**Why:** Instant demo without account creation. Data persists in browser for quick testing.
 
 **Implications:**
-- Every CRUD function has `if (useSupabase) { ... } else { ... }` branches
+- Every service function has `if (isSupabaseConfigured && supabase) { ... } else { ... }` branches
 - localStorage mode has no auth enforcement — any "user" can see any data
-- localStorage mode uses `Date.now()` for IDs (not UUIDs like Supabase)
 - Data keyed by `userId` in localStorage, but no migration path between modes
 
 ---
 
-## 4. OpenAI called directly from browser
+## 3. OpenAI called directly from browser
 
-**What:** `generateProposalWithAI()` in `supabase.js:106-149` sends the API key in a `fetch()` call directly to `api.openai.com`.
+**What:** `generateProposal()` in `proposals.service.ts` sends the API key via `fetch()` to `api.openai.com`.
 
-**Why (implied):** No server-side code exists. Keeping it simple for MVP.
+**Why:** No server-side code exists. Keeping it simple for MVP.
 
 **Implications:**
 - OpenAI API key is visible in browser network tab
 - No rate limiting, no spending controls
-- Acceptable for personal MVP use, not for production with real users
-- Fallback template generator exists (`generateAIProposalFallback`) for when no key is set
+- Acceptable for personal MVP use, not for production
+- Fallback template generator exists for when no key is set
 
 ---
 
-## 5. Model mismatch: code says `gpt-3.5-turbo`, README says `gpt-4o-mini`
+## 4. Dark theme only, no light mode
 
-**What:** `supabase.js:122` uses `model: 'gpt-3.5-turbo'`. README line 57 recommends `gpt-4o-mini`.
+**What:** Tailwind CSS v4 `@theme` block defines a single dark color palette.
 
-**Why:** Likely the code was written first with 3.5-turbo, README updated later without syncing.
-
-**Implication:** The actual model used at runtime is `gpt-3.5-turbo`. README is misleading.
-
----
-
-## 6. Dark theme only, no light mode
-
-**What:** `styles.css` defines a single dark color palette via CSS custom properties (`:root`).
-
-**Why (implied):** Design choice for a developer/freelancer tool. No toggle exists.
+**Why:** Design choice for a developer/freelancer tool. Clean, professional look.
 
 **Implications:**
-- All colors are hardcoded to dark values
-- Adding light mode later would require refactoring all color references to use the existing CSS variables (which are already well-structured for this)
+- All colors hardcoded to dark values in `@theme`
+- Adding light mode later requires refactoring to semantic color tokens
 
 ---
 
-## 7. Inline event handlers throughout
+## 5. Context-based cross-cutting concerns
 
-**What:** `onclick`, `onsubmit`, `oninput`, `ondragstart` etc. are used directly in `index.html` HTML attributes.
+**What:** Toast notifications and Confirm dialogs use React Context providers (ToastContext, ConfirmContext).
 
-**Why (implied):** Fastest way to wire up a vanilla JS SPA without a framework.
+**Why:** Avoids prop drilling, provides global access from any component, clean API via hooks (`useToast()`, `useConfirm()`).
 
 **Implications:**
-- All handler functions must be global
-- No event delegation pattern
-- Difficult to test in isolation
-- CSP (Content Security Policy) would require `unsafe-inline`
+- Toast auto-dismisses after 4 seconds
+- Confirm dialog returns `Promise<boolean>` — async/await pattern
+- Both wrap the entire app in the provider hierarchy
 
 ---
 
-## 8. Single modal overlay for all modals
+## 6. Lazy-loaded routes with React.lazy
 
-**What:** One `#modal-overlay` div contains all 6 modal content divs. Only one is shown at a time via `showModal(id)`.
+**What:** All 6 page components are loaded on demand via `React.lazy()` + `Suspense`.
 
-**Why:** Simplifies modal management — single escape handler, single backdrop.
+**Why:** Reduces initial bundle size. Each page is a separate chunk (~3-7KB).
 
 **Implications:**
-- All modals share the same DOM tree
-- Opening a modal hides all others first (`app.js:910`)
-- No stacking, no concurrent modals
+- First paint is faster (only loads core + current page)
+- Spinner shown while chunk loads
+- Code splitting happens automatically via Vite
 
 ---
 
-## 9. Activity log as array, not as a real log
+## 7. Responsive design with Tailwind breakpoints
 
-**What:** `activity` is an in-memory array capped at 20 entries (`app.js:178`). Each entry has `text`, `time`, `created_at`.
+**What:** Mobile-first approach. Sidebar hidden behind hamburger on mobile. Tables convert to card layouts.
 
-**Why (implied):** Simple "recent activity" widget on dashboard.
+**Why:** Freelancers use phones/tablets. Responsive is essential for real-world usage.
 
 **Implications:**
-- Activity is lost on page reload in Supabase mode (fetched fresh each time)
-- No entity association — activity entries are plain text strings
-- No pagination, no filtering
+- Sidebar uses CSS transitions for slide-in/out
+- Tables have dual rendering: `<table>` (desktop) + card list (mobile)
+- Grid layouts adapt: 1 col → 2 col → 4 col
 
 ---
 
-## 10. Schema drift between README and schema.sql
+## 8. ErrorBoundary as class component
 
-**What:** README lists 9 tables (`profiles`, `email_events`, `invoice_items`, `activity_log`) but `schema.sql` only defines 6 tables. No `profiles`, `email_events`, `invoice_items`, or `activity_log` tables exist.
+**What:** Global error boundary wraps the entire app. Class component (React limitation — no hook-based error boundary).
 
-**Why:** README was likely written from a design doc; schema was simplified for MVP.
+**Why:** Catches rendering errors that would otherwise crash the entire app silently.
 
-**Implication:** `schema.sql` is the source of truth. README is outdated on this point.
+**Implications:**
+- Shows user-friendly fallback UI with error message
+- Logs error details to console for debugging
+- "Reload page" button as recovery mechanism
+
+---
+
+## 9. Vitest for testing
+
+**What:** Vitest with jsdom environment, React Testing Library for component tests.
+
+**Why:** Fast, Vite-native, compatible with Jest API. RTL tests components the way users interact with them.
+
+**Implications:**
+- Tests run in jsdom (not real browser)
+- localStorage mode services can be tested without mocking Supabase
+- Component tests verify rendering, user interactions, and state changes

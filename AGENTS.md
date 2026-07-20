@@ -2,35 +2,62 @@
 
 ## What this is
 
-Vanilla JS single-page app. No framework, no build step, no package manager, no bundler. All code is plain ES modules loaded via `<script>` tags.
+React 19 + TypeScript + Vite + TailwindCSS v4 single-page application. Dual-mode backend (Supabase or localStorage fallback).
 
 ## Local dev
 
 ```bash
-npx serve .        # → http://localhost:3000
-python -m http.server 8080   # alternative
+npm install
+npm run dev        # → http://localhost:5173
 ```
 
-No `npm install` needed. No `package.json` exists.
+## Scripts
 
-## Script load order (critical)
+```bash
+npm run dev        # Vite dev server
+npm run build      # tsc -b && vite build
+npm run preview    # Preview production build
+npm run lint       # ESLint
+npm run format     # Prettier
+npm test           # Vitest (single run)
+npm run test:watch # Vitest (watch mode)
+```
 
-In `index.html`, scripts load in this exact order — globals from earlier files are used by later ones:
+## Architecture
 
-1. `config.js` — `getConfig()`, `saveConfig()`, `toggleConfig()`
-2. `supabase.js` — `initSupabase()`, auth wrappers, DB CRUD, OpenAI proxy
-3. `app.js` — all UI logic, state, event handlers
+### File Structure
 
-Never break this order. All functions are global (no modules).
+```
+src/
+├── lib/           # Types, utils, supabase client
+├── services/      # One file per domain (SRP), dual-mode (Supabase + localStorage)
+├── hooks/         # One hook per module (useAuth, useContacts, etc.)
+├── contexts/      # ToastContext, ConfirmContext
+├── components/
+│   ├── ui/        # Design system (Button, Modal, Input, Spinner, Toast, etc.)
+│   ├── layout/    # Sidebar, AppLayout
+│   ├── auth/      # LoginPage
+│   └── ErrorBoundary.tsx
+├── pages/         # One page per view (lazy-loaded)
+└── test/          # Vitest setup
+```
 
-## Architecture: dual-mode backend
+### Provider Hierarchy
 
-- **Supabase configured** → auth + Postgres + RLS via Supabase JS v2 (CDN)
-- **No config** → everything falls back to `localStorage` automatically
+```
+StrictMode > ErrorBoundary > AuthProvider > ToastProvider > ConfirmProvider > BrowserRouter
+```
 
-The toggle is `useSupabase` (global bool in `supabase.js`). Every DB function checks this flag.
+### Dual-Mode Backend
 
-API keys are stored in `localStorage` under key `freelanceai_config` (NOT `crm_config` — README is wrong about this).
+- **Supabase configured** → auth + Postgres + RLS via Supabase JS v2
+- **No config** → everything falls back to `localStorage`
+
+The toggle is `isSupabaseConfigured` (from `lib/supabase.ts`).
+
+### Code Splitting
+
+All pages are lazy-loaded via `React.lazy()` in `App.tsx`. Each page is a separate Vite chunk.
 
 ## UI language
 
@@ -38,30 +65,27 @@ All user-facing text is **Spanish**. Keep it consistent when adding features.
 
 ## Database
 
-Schema: `schema.sql` — 6 tables: `contacts`, `deals`, `proposals`, `emails`, `invoices`, `activity`.
+Schema: `supabase/schema.sql` — 6 tables: `contacts`, `deals`, `proposals`, `emails`, `invoices`, `activity`.
 
-All tables have RLS with `auth.uid() = user_id`. Every table has a `user_id UUID REFERENCES auth.users(id)` column.
+All tables have RLS with `auth.uid() = user_id`.
 
-Run `schema.sql` in Supabase SQL Editor to set up. The `ALTER DATABASE` line at the top is a placeholder — Supabase manages JWT secrets automatically.
+## Testing
 
-**Note:** README lists tables (`profiles`, `email_events`, `invoice_items`, `activity_log`) that do NOT exist in `schema.sql`. The schema is the source of truth.
+```bash
+npm test           # Single run
+npm run test:watch # Watch mode
+```
 
-## Known technical debt
-
-- `app.js` is 921 lines (monolith) — needs splitting
-- `styles.css` is 759 lines — needs splitting
-- No tests, no linting, no formatter, no CI
-- OpenAI API key is called directly from the browser (security risk in production)
-- Inline event handlers (`onclick`, `onsubmit`) throughout `index.html`
-- No TypeScript, no module system — everything is global
+- Unit tests: `src/lib/__tests__/`, `src/services/__tests__/`
+- Component tests: `src/components/__tests__/`
+- Framework: Vitest + React Testing Library + jsdom
 
 ## Security notes
 
 - OpenAI API key is sent from the browser to `api.openai.com` — acceptable for MVP, not for production
 - Supabase anon key is client-side (standard for Supabase, RLS protects data)
-- Never move secrets to `localStorage` if they weren't already there
 - RLS policies are the only data isolation — never disable them
 
-## Roadmap context
+## Roadmap
 
-Tests (Playwright + Vitest) and TypeScript + Vite migration are planned but not started. When adding tests, the project will need a `package.json` first.
+See `docs/ROADMAP.md` for full roadmap.
