@@ -35,11 +35,6 @@ Known issues, code smells, and missing capabilities. Each item includes where it
 - **Impact:** No safety net for regressions. Cannot verify changes confidently.
 - **Fix:** Add unit tests (Vitest) and E2E tests (Playwright). Requires `package.json` first.
 
-### No linting or formatting
-- **Where:** No `.eslintrc`, `.prettierrc`, or any tool config.
-- **Impact:** Code style inconsistencies accumulate over time.
-- **Fix:** Add ESLint + Prettier with a shared config.
-
 ---
 
 ## Medium

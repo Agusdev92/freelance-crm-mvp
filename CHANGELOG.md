@@ -9,6 +9,8 @@ El formato de este archivo se basa en [Keep a Changelog](https://keepachangelog.
 - Instrucciones para agentes de IA en `AGENTS.md`.
 - Este archivo `CHANGELOG.md`.
 - Estrategia de versionado en `VERSIONING.md`.
+- ESLint (flat config) con reglas para React 19 + TypeScript. Script `npm run lint`.
+- Prettier con config consistente. Script `npm run format`.
 
 ## [0.1.0] - 2026-07-20
 
@@ -29,9 +31,8 @@ El formato de este archivo se basa en [Keep a Changelog](https://keepachangelog.
 ### Known Limitations
 - API key de OpenAI expuesta al navegador (aceptable para MVP personal).
 - Auth en localStorage almacena contraseñas en texto plano.
-- Sin tests, sin linting, sin formatter.
-- `app.js` es un monolito de 921 líneas.
-- README contiene informacion incorrecta (clave localStorage, modelo de IA, tablas inexistentes).
+- Sin tests.
+- Dependencias no usadas: `@dnd-kit/*`, `zod`.
 
 [Unreleased]: https://github.com/Agusdev92/freelance-crm-mvp/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Agusdev92/freelance-crm-mvp/releases/tag/v0.1.0
