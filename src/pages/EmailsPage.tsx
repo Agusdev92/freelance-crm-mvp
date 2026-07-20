@@ -84,66 +84,115 @@ export function EmailsPage() {
       ) : filtered.length === 0 ? (
         <EmptyState message="No hay emails registrados" />
       ) : (
-        <div className="bg-surface-50 border border-slate-700/50 rounded-2xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-700/50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Para</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Asunto</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Enviado</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Abierto</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(e => {
-                const contact = contacts.find(c => c.id === e.contact_id)
-                return (
-                  <tr key={e.id} className="border-b border-slate-700/30 last:border-0 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-4 text-sm">{contact?.name || 'Desconocido'}</td>
-                    <td className="px-5 py-4 text-sm text-slate-300">{e.subject}</td>
-                    <td className="px-5 py-4 text-sm text-slate-400">
-                      {e.sent_at ? formatDate(e.sent_at) : '-'}
-                    </td>
-                    <td className="px-5 py-4">
-                      {e.opened ? (
-                        <span className="text-emerald-400 text-sm font-medium">✓ Abierto</span>
-                      ) : (
-                        <span className="text-slate-500 text-sm">Pendiente</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        {!e.opened && (
-                          <button
-                            onClick={() => markAsOpened(e.id)}
-                            className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors cursor-pointer"
-                            title="Simular apertura"
-                          >
-                            <Check size={14} />
-                          </button>
+        <>
+          <div className="bg-surface-50 border border-slate-700/50 rounded-2xl overflow-hidden hidden md:block">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-700/50">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Para</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Asunto</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Enviado</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Abierto</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(e => {
+                  const contact = contacts.find(c => c.id === e.contact_id)
+                  return (
+                    <tr key={e.id} className="border-b border-slate-700/30 last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-4 text-sm">{contact?.name || 'Desconocido'}</td>
+                      <td className="px-5 py-4 text-sm text-slate-300">{e.subject}</td>
+                      <td className="px-5 py-4 text-sm text-slate-400">
+                        {e.sent_at ? formatDate(e.sent_at) : '-'}
+                      </td>
+                      <td className="px-5 py-4">
+                        {e.opened ? (
+                          <span className="text-emerald-400 text-sm font-medium">Abierto</span>
+                        ) : (
+                          <span className="text-slate-500 text-sm">Pendiente</span>
                         )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          {!e.opened && (
+                            <button
+                              onClick={() => markAsOpened(e.id)}
+                              className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors cursor-pointer"
+                              title="Simular apertura"
+                            >
+                              <Check size={14} />
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: 'Eliminar email',
+                                message: '¿Estás seguro de eliminar este email registrado?',
+                                confirmLabel: 'Eliminar',
+                              })
+                              if (ok) removeEmail(e.id)
+                            }}
+                            className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {filtered.map(e => {
+              const contact = contacts.find(c => c.id === e.contact_id)
+              return (
+                <div key={e.id} className="bg-surface-50 border border-slate-700/50 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <div className="font-medium text-sm">{e.subject}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">{contact?.name || 'Desconocido'}</div>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {!e.opened && (
                         <button
-                          onClick={async () => {
-                            const ok = await confirm({
-                              title: 'Eliminar email',
-                              message: '¿Estás seguro de eliminar este email registrado?',
-                              confirmLabel: 'Eliminar',
-                            })
-                            if (ok) removeEmail(e.id)
-                          }}
-                          className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                          onClick={() => markAsOpened(e.id)}
+                          className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors cursor-pointer"
                         >
-                          <Trash2 size={14} />
+                          <Check size={14} />
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                      )}
+                      <button
+                        onClick={async () => {
+                          const ok = await confirm({
+                            title: 'Eliminar email',
+                            message: '¿Estás seguro de eliminar este email?',
+                            confirmLabel: 'Eliminar',
+                          })
+                          if (ok) removeEmail(e.id)
+                        }}
+                        className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>{e.sent_at ? formatDate(e.sent_at) : '-'}</span>
+                    {e.opened ? (
+                      <span className="text-emerald-400 font-medium">Abierto</span>
+                    ) : (
+                      <span>Pendiente</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Registrar Email Enviado">

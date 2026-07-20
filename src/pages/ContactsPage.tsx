@@ -114,8 +114,9 @@ export function ContactsPage() {
       ) : filtered.length === 0 ? (
         <EmptyState message="No hay contactos. ¡Agrega uno!" />
       ) : (
-        <div className="bg-surface-50 border border-slate-700/50 rounded-2xl overflow-hidden">
-          <table className="w-full">
+        <>
+          <div className="bg-surface-50 border border-slate-700/50 rounded-2xl overflow-hidden hidden md:block">
+            <table className="w-full">
             <thead>
               <tr className="border-b border-slate-700/50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Nombre</th>
@@ -152,7 +153,35 @@ export function ContactsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {filtered.map(c => (
+              <div key={c.id} className="bg-surface-50 border border-slate-700/50 rounded-xl p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="font-medium text-sm">{c.name}</div>
+                  <div className="flex gap-1.5">
+                    <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors cursor-pointer">
+                      <Pencil size={14} />
+                    </button>
+                    <button onClick={() => handleDelete(c.id, c.name)} className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">{c.email}</div>
+                {c.company && <div className="text-xs text-slate-500 mt-1">{c.company}</div>}
+                {(c.tags || []).length > 0 && (
+                  <div className="flex gap-1 flex-wrap mt-2">
+                    {c.tags.map(t => (
+                      <Badge key={t}>{t}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       <Modal

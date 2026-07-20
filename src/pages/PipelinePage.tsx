@@ -132,7 +132,7 @@ export function PipelinePage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-4 gap-5 min-h-[500px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 min-h-[300px] md:min-h-[500px]">
         {STAGES.map(stage => {
           const stageDeals = deals.filter(d => d.stage === stage.key)
           return (

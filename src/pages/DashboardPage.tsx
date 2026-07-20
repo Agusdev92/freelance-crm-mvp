@@ -65,7 +65,7 @@ export function DashboardPage() {
         <p className="text-slate-400 text-sm mt-1">Resumen de tu negocio</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mb-8">
         {statCards.map(stat => (
           <Card key={stat.label} className="p-6">
             <div className="flex items-center gap-3 mb-3">
@@ -79,7 +79,7 @@ export function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <Card className="p-6">
           <h3 className="text-sm font-medium text-slate-400 mb-4">Deals Recientes</h3>
           <div className="space-y-3 max-h-72 overflow-y-auto">

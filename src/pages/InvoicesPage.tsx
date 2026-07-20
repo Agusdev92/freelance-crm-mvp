@@ -111,7 +111,7 @@ export function InvoicesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-4 gap-5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mb-8">
         {statCards.map(stat => (
           <Card key={stat.label} className="p-5">
             <div className="text-slate-400 text-sm mb-1">{stat.label}</div>
@@ -125,73 +125,125 @@ export function InvoicesPage() {
       ) : invoices.length === 0 ? (
         <EmptyState message="No hay facturas aún" />
       ) : (
-        <div className="bg-surface-50 border border-slate-700/50 rounded-2xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-700/50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">#</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Cliente</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Concepto</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Monto</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Estado</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Vencimiento</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map(inv => {
-                const contact = contacts.find(c => c.id === inv.contact_id)
-                return (
-                  <tr key={inv.id} className="border-b border-slate-700/30 last:border-0 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-4 text-sm text-slate-400">{inv.number || `#${inv.id.slice(-6)}`}</td>
-                    <td className="px-5 py-4 text-sm">{contact?.name || '-'}</td>
-                    <td className="px-5 py-4 text-sm text-slate-300">{inv.concept}</td>
-                    <td className="px-5 py-4 text-sm font-semibold">{formatCurrency(inv.amount)}</td>
-                    <td className="px-5 py-4">
-                      <span className={`text-sm font-medium ${STATUS_COLORS[inv.status]}`}>
-                        {STATUS_LABELS[inv.status]}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-slate-400">
-                      {inv.due_date ? formatDate(inv.due_date) : '-'}
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        {inv.status === 'pending' && (
+        <>
+          <div className="bg-surface-50 border border-slate-700/50 rounded-2xl overflow-hidden hidden md:block">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-700/50">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">#</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Cliente</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Concepto</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Monto</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Estado</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Vencimiento</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-indigo-500/5">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.map(inv => {
+                  const contact = contacts.find(c => c.id === inv.contact_id)
+                  return (
+                    <tr key={inv.id} className="border-b border-slate-700/30 last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-4 text-sm text-slate-400">{inv.number || `#${inv.id.slice(-6)}`}</td>
+                      <td className="px-5 py-4 text-sm">{contact?.name || '-'}</td>
+                      <td className="px-5 py-4 text-sm text-slate-300">{inv.concept}</td>
+                      <td className="px-5 py-4 text-sm font-semibold">{formatCurrency(inv.amount)}</td>
+                      <td className="px-5 py-4">
+                        <span className={`text-sm font-medium ${STATUS_COLORS[inv.status]}`}>
+                          {STATUS_LABELS[inv.status]}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-slate-400">
+                        {inv.due_date ? formatDate(inv.due_date) : '-'}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          {inv.status === 'pending' && (
+                            <button
+                              onClick={() => markPaid(inv.id)}
+                              className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-emerald-500 hover:text-emerald-400 transition-colors cursor-pointer"
+                              title="Marcar pagado"
+                            >
+                              <Check size={14} />
+                            </button>
+                          )}
                           <button
-                            onClick={() => markPaid(inv.id)}
-                            className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-emerald-500 hover:text-emerald-400 transition-colors cursor-pointer"
-                            title="Marcar pagado"
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: 'Eliminar factura',
+                                message: '¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.',
+                                confirmLabel: 'Eliminar',
+                              })
+                              if (ok) removeInvoice(inv.id)
+                            }}
+                            className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
                           >
-                            <Check size={14} />
+                            <Trash2 size={14} />
                           </button>
-                        )}
-                        <button
-                          onClick={async () => {
-                            const ok = await confirm({
-                              title: 'Eliminar factura',
-                              message: '¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.',
-                              confirmLabel: 'Eliminar',
-                            })
-                            if (ok) removeInvoice(inv.id)
-                          }}
-                          className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {invoices.map(inv => {
+              const contact = contacts.find(c => c.id === inv.contact_id)
+              return (
+                <div key={inv.id} className="bg-surface-50 border border-slate-700/50 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <div className="font-medium text-sm">{inv.concept}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        {inv.number || `#${inv.id.slice(-6)}`} · {contact?.name || '-'}
                       </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {inv.status === 'pending' && (
+                        <button
+                          onClick={() => markPaid(inv.id)}
+                          className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-emerald-500 hover:text-emerald-400 transition-colors cursor-pointer"
+                        >
+                          <Check size={14} />
+                        </button>
+                      )}
+                      <button
+                        onClick={async () => {
+                          const ok = await confirm({
+                            title: 'Eliminar factura',
+                            message: '¿Estás seguro de eliminar esta factura?',
+                            confirmLabel: 'Eliminar',
+                          })
+                          if (ok) removeInvoice(inv.id)
+                        }}
+                        className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:border-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm">{formatCurrency(inv.amount)}</span>
+                    <span className={`text-xs font-medium ${STATUS_COLORS[inv.status]}`}>
+                      {STATUS_LABELS[inv.status]}
+                    </span>
+                  </div>
+                  {inv.due_date && (
+                    <div className="text-xs text-slate-500 mt-1">Vence: {formatDate(inv.due_date)}</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva Factura">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Cliente *"
               options={contactOptions}
