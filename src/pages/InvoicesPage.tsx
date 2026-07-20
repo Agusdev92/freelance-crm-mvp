@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/Select'
 import { Textarea } from '@/components/ui/Textarea'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { LoadingSection } from '@/components/ui/Spinner'
 import { Plus, Check, Trash2 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { InvoiceStatus } from '@/lib/types'
@@ -118,7 +119,7 @@ export function InvoicesPage() {
       </div>
 
       {loading && invoices.length === 0 ? (
-        <div className="text-center py-12 text-slate-500">Cargando...</div>
+        <LoadingSection />
       ) : invoices.length === 0 ? (
         <EmptyState message="No hay facturas aún" />
       ) : (

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { LoadingSection } from '@/components/ui/Spinner'
 import { Search, Plus, Pencil, Trash2 } from 'lucide-react'
 import type { Contact } from '@/lib/types'
 
@@ -102,7 +103,7 @@ export function ContactsPage() {
       </div>
 
       {loading && contacts.length === 0 ? (
-        <div className="text-center py-12 text-slate-500">Cargando...</div>
+        <LoadingSection />
       ) : filtered.length === 0 ? (
         <EmptyState message="No hay contactos. ¡Agrega uno!" />
       ) : (

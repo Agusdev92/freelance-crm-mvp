@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { Spinner } from '@/components/ui/Spinner'
 
 export function LoginPage() {
   const { login, register } = useAuth()
@@ -68,7 +69,7 @@ export function LoginPage() {
           />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Cargando...' : isLogin ? 'Entrar' : 'Crear cuenta'}
+            {loading ? <><Spinner size={16} /> Cargando...</> : isLogin ? 'Entrar' : 'Crear cuenta'}
           </Button>
         </form>
 

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Textarea } from '@/components/ui/Textarea'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { LoadingSection, Spinner } from '@/components/ui/Spinner'
 import { Plus, FileText, Copy, Trash2 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
@@ -96,7 +97,7 @@ export function ProposalsPage() {
       </div>
 
       {loading && proposals.length === 0 ? (
-        <div className="text-center py-12 text-slate-500">Cargando...</div>
+        <LoadingSection />
       ) : proposals.length === 0 ? (
         <EmptyState icon={<FileText size={48} />} message="No hay propuestas aún. ¡Genera una con IA!" />
       ) : (
@@ -180,7 +181,7 @@ export function ProposalsPage() {
               Cancelar
             </Button>
             <Button onClick={handleGenerate} disabled={generating}>
-              {generating ? 'Generando...' : '🤖 Generar Propuesta'}
+              {generating ? <><Spinner size={16} /> Generando...</> : 'Generar Propuesta'}
             </Button>
           </div>
         </div>
